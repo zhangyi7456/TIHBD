@@ -1,0 +1,10 @@
+[
+  {"id":"price-penalty","construct":"RBI","name":"陌生人采购价差","unit":"%","direction":"positive","halfLifeMonths":6,"anchors":{"0":"无可测价差","25":"价差低于2%","50":"价差2%–5%","75":"价差5%–10%","100":"价差超过10%或无法获得核心报价"}},
+  {"id":"credit-gap","construct":"RBI","name":"账期差","unit":"天","direction":"positive","halfLifeMonths":12,"anchors":{"0":"结算条件相同","25":"差异少于7天","50":"差异15–30天","75":"差异30–60天并存在额度差","100":"无担保无法获得核心供货或账期"}},
+  {"id":"quality-access","construct":"CBI","name":"好货获得概率差","unit":"百分点","direction":"positive","halfLifeMonths":12,"anchors":{"0":"获得概率相同","25":"差异低于10个百分点","50":"差异10–25个百分点","75":"差异25–50个百分点","100":"新人稳定面对逆向选择"}},
+  {"id":"information-delay","construct":"CBI","name":"关键信息延迟","unit":"小时","direction":"positive","halfLifeMonths":6,"anchors":{"0":"公开同步","25":"延迟不足6小时","50":"延迟6–24小时","75":"延迟1–3天","100":"关键信息仅在私域网络流动"}},
+  {"id":"liquidation-discount","construct":"SBI","name":"库存变现折价","unit":"%","direction":"positive","halfLifeMonths":6,"anchors":{"0":"无额外折价","25":"折价低于3%","50":"折价3%–8%","75":"折价8%–20%","100":"无法在关键时间窗变现"}},
+  {"id":"supplier-concentration","construct":"SBI","name":"核心供应节点集中度","unit":"CR5 %","direction":"positive","halfLifeMonths":36,"anchors":{"0":"CR5低于10%","25":"CR5为10%–25%","50":"CR5为25%–50%","75":"CR5为50%–80%","100":"单一或极少节点不可绕过"}},
+  {"id":"license-scarcity","construct":"SBI","name":"许可稀缺程度","unit":"等级","direction":"positive","halfLifeMonths":120,"anchors":{"0":"登记即可进入","25":"一般许可且供给充分","50":"审批与设施要求明显","75":"许可数量有限且周期长","100":"资源规划决定可否进入"}},
+  {"id":"switching-rate","construct":"RBI","name":"客户年度供应商转换率","unit":"%","direction":"negative","halfLifeMonths":12,"anchors":{"0":"转换率高于60%","25":"40%–60%","50":"20%–40%","75":"5%–20%","100":"低于5%或近乎锁定"}}
+]

@@ -34,6 +34,8 @@ npm run build
 - `/gatekeepers`：传统守门人向数字或制度化守门人的迁移账本
 - `/industry/[id]`：行业壁垒指纹、守门人迁移、证据状态和证伪条件
 - `/evidence`：证据等级与登记规范
+- `/evidence/coverage`：证据覆盖、变量分布和优先调查缺口
+- `/research`：浏览器本地研究观测录入与JSON导出
 - `/methodology`：指标体系、瓶颈算法与伦理边界
 
 ## 评分

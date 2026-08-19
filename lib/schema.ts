@@ -27,3 +27,10 @@ export const marketCellSchema = z.object({
   outsiderPenalty: z.object({ price: z.number().min(0).max(100), credit: z.number().min(0).max(100), quality: z.number().min(0).max(100), information: z.number().min(0).max(100), liquidation: z.number().min(0).max(100) })
 });
 export type MarketCell = z.infer<typeof marketCellSchema>;
+
+export const observationSchema = z.object({
+  id:z.string(), marketCellId:z.string(), indicatorId:z.string(), value:z.number(), unit:z.string(), sampleSize:z.number().int().positive(),
+  observedAt:z.string(), method:z.enum(["配对询价","半结构访谈","公开数据","交易记录","现场观察"]),
+  comparisonGroup:z.string(), sourceNote:z.string(), reviewerStatus:z.enum(["草稿","待复核","已复核"]), createdAt:z.string()
+});
+export type Observation = z.infer<typeof observationSchema>;
