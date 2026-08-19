@@ -1,5 +1,7 @@
 # TIHBD
 
+[在线预览](https://zhangyi7456.github.io/TIHBD/)
+
 Traditional Industry Hidden Barrier Database / 中国传统行业隐形控制网络地图。
 
 这是一个研究型 Web V1，用来比较圈外人进入传统行业时面对的关系、结构和认知壁垒，以及数字化绕过潜力。当前 52 个行业条目均为“研究先验 · 置信度 0.35 · 待证据校准”，不是官方统计或事实排名。
@@ -19,6 +21,8 @@ npm run typecheck
 npm test
 npm run build
 ```
+
+`main` 分支推送后，GitHub Actions 会运行检查、生成静态站点并自动发布到 GitHub Pages。
 
 ## 路由
 
