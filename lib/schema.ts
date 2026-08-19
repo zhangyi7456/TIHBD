@@ -28,6 +28,14 @@ export const marketCellSchema = z.object({
 });
 export type MarketCell = z.infer<typeof marketCellSchema>;
 
+export const goldSampleSchema = z.object({
+  id:z.string(), pair:z.string(), archetype:z.string(), cellIds:z.array(z.string()).length(2),
+  status:z.enum(["候选","采集中","已校准"]), priority:z.number().int().positive(),
+  hypothesis:z.string(), counterEvidence:z.string(), methods:z.array(z.enum(["配对询价","半结构访谈","公开数据","交易记录","现场观察"])).min(2),
+  minimumEvidence:z.object({merchantsPerCell:z.number().int().positive(),interviewsPerCell:z.number().int().positive(),independentSources:z.number().int().positive()})
+});
+export type GoldSample = z.infer<typeof goldSampleSchema>;
+
 export const observationSchema = z.object({
   id:z.string(), marketCellId:z.string(), indicatorId:z.string(), value:z.number(), unit:z.string(), sampleSize:z.number().int().positive(),
   observedAt:z.string(), method:z.enum(["配对询价","半结构访谈","公开数据","交易记录","现场观察"]),

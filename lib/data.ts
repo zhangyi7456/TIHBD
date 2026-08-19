@@ -1,7 +1,8 @@
 import raw from "@/data/industries.seed.json";
 import rawEvidence from "@/data/evidence.seed.json";
 import rawCells from "@/data/market-cells.seed.json";
-import { evidenceSchema, industriesSchema, marketCellSchema } from "./schema";
+import rawGoldSamples from "@/data/gold-samples.seed.json";
+import { evidenceSchema, goldSampleSchema, industriesSchema, marketCellSchema } from "./schema";
 import { calculateEEB, calculateOutsiderPenalty, confidenceFromEvidence } from "./algorithm";
 import { z } from "zod";
 import { classifyIndustry, taxonomyVersion } from "./taxonomy";
@@ -14,4 +15,5 @@ export const marketCells = z.array(marketCellSchema).parse(rawCells).map((cell) 
 export const getIndustryEvidence = (industryId:string) => evidence.filter((x)=>x.industryId===industryId);
 export const getIndustryCells = (industryId:string) => marketCells.filter((x)=>x.industryId===industryId);
 export const getMarketCell = (id:string) => marketCells.find((x)=>x.id===id);
+export const goldSamples = z.array(goldSampleSchema).parse(rawGoldSamples).map((sample)=>({...sample,cells:sample.cellIds.map((id)=>getMarketCell(id)).filter(Boolean)}));
 export const getIndustryConfidence = (industryId:string) => confidenceFromEvidence(getIndustryEvidence(industryId).map((x)=>({grade:x.grade,directness:x.directness,generalizable:x.generalizable,ageYears:Math.max(0,2026-Number(x.publishedAt.slice(0,4)))})));
