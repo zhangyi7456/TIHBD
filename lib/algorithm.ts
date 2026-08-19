@@ -24,3 +24,9 @@ export function confidenceFromEvidence(items: EvidenceInput[]) {
   const signal = items.reduce((sum, item) => sum + evidenceWeight(item), 0);
   return Math.round(Math.min(.95, .35 + .6 * (1 - Math.exp(-signal / 2))) * 100) / 100;
 }
+export type OutsiderPenaltyInput = { price:number; credit:number; quality:number; information:number; liquidation:number };
+export function calculateOutsiderPenalty(p:OutsiderPenaltyInput){
+  const values = Object.values(p).map(clamp);
+  const weighted = values[0]*.15 + values[1]*.25 + values[2]*.2 + values[3]*.2 + values[4]*.2;
+  return Math.round(weighted*10)/10;
+}

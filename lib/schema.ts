@@ -21,6 +21,7 @@ export type Evidence = z.infer<typeof evidenceSchema>;
 export const marketCellSchema = z.object({
   id: z.string(), industryId: z.string(), region: z.string(), stage: z.string(), period: z.string(),
   rbi: z.number(), sbi: z.number(), cbi: z.number(), bpi: z.number(), confidence: z.number().min(0).max(1),
-  status: z.literal("研究假设"), note: z.string()
+  status: z.literal("研究假设"), note: z.string(),
+  outsiderPenalty: z.object({ price: z.number().min(0).max(100), credit: z.number().min(0).max(100), quality: z.number().min(0).max(100), information: z.number().min(0).max(100), liquidation: z.number().min(0).max(100) })
 });
 export type MarketCell = z.infer<typeof marketCellSchema>;
