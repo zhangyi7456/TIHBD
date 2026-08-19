@@ -26,6 +26,7 @@ npm run build
 - `/industries`：搜索、分类筛选与排序矩阵
 - `/market-cells`：行业 × 地区 × 环节 × 时间的研究单元
 - `/market-cells/[id]`：单元壁垒、圈外人惩罚、守门人迁移和验证计划
+- `/gatekeepers`：传统守门人向数字或制度化守门人的迁移账本
 - `/industry/[id]`：行业壁垒指纹、守门人迁移、证据状态和证伪条件
 - `/evidence`：证据等级与登记规范
 - `/methodology`：指标体系、瓶颈算法与伦理边界
