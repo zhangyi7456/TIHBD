@@ -1,0 +1,13 @@
+import { describe, expect, it } from "vitest";
+import { calculateEEB, classifyQuadrant, confidenceFromEvidence, evidenceWeight } from "./algorithm";
+describe("EEB bottleneck model", () => {
+  it("keeps a single extreme bottleneck visible", () => expect(calculateEEB({ rbi:30,sbi:100,cbi:30,bpi:20 })).toBe(74.6));
+  it("returns 60 for balanced scores", () => expect(calculateEEB({ rbi:60,sbi:60,cbi:60,bpi:50 })).toBe(60));
+  it("clamps invalid numeric inputs", () => expect(calculateEEB({ rbi:-10,sbi:120,cbi:30,bpi:0 })).toBe(68.3));
+  it("classifies high and bypassable markets", () => expect(classifyQuadrant({ rbi:90,sbi:70,cbi:90,bpi:70 })).toBe("高壁垒·可重构"));
+});
+describe("evidence confidence", () => {
+  it("keeps unsupported priors at 0.35", () => expect(confidenceFromEvidence([])).toBe(.35));
+  it("weights A evidence above D evidence", () => expect(evidenceWeight({grade:"A",directness:1,generalizable:true,ageYears:0})).toBeGreaterThan(evidenceWeight({grade:"D",directness:1,generalizable:true,ageYears:0})));
+  it("caps confidence below certainty", () => expect(confidenceFromEvidence(Array(20).fill({grade:"A",directness:1,generalizable:true,ageYears:0}))).toBe(.95));
+});

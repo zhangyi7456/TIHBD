@@ -1,0 +1,1 @@
+export function ConfidenceMeter({value}:{value:number}){const pct=Math.round(value*100);return <div><div className="flex justify-between text-xs mb-2"><span className="text-[color:var(--muted)]">证据置信度</span><b>{pct}%</b></div><div className="h-1 bg-black/10"><div className="h-full bg-[color:var(--green)] transition-all duration-700" style={{width:`${pct}%`}}/></div></div>}

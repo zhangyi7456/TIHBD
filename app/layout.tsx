@@ -1,0 +1,7 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Database, Search } from "lucide-react";
+import "./globals.css";
+export const metadata: Metadata = { title:"TIHBD — 传统行业隐形壁垒数据库", description:"非正式市场制度的可验证研究工具" };
+const links=[["/","概览"],["/industries","行业矩阵"],["/market-cells","市场单元"],["/evidence","证据"],["/methodology","方法论"]];
+export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="zh-CN"><body><header className="sticky top-0 z-50 border-b hairline bg-[color:var(--paper)]/95 backdrop-blur"><div className="shell h-16 flex items-center justify-between"><Link href="/" className="flex items-center gap-3 font-semibold tracking-tight"><Database size={18}/><span>TIHBD</span><span className="hidden md:inline text-xs font-normal text-[color:var(--muted)]">传统行业隐形壁垒数据库</span></Link><nav className="flex items-center gap-5 text-sm">{links.map(([h,l])=><Link key={h} href={h} className="hover:text-[color:var(--accent)] transition-colors">{l}</Link>)}<Link href="/industries" aria-label="搜索"><Search size={17}/></Link></nav></div></header>{children}<footer className="shell py-12 mt-16 border-t hairline text-xs text-[color:var(--muted)] flex flex-wrap justify-between gap-4"><span>TIHBD · Research MVP</span><span>不将民族、宗教或地域身份直接作为因果评分</span></footer></body></html>}
