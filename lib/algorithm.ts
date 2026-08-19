@@ -30,3 +30,23 @@ export function calculateOutsiderPenalty(p:OutsiderPenaltyInput){
   const weighted = values[0]*.15 + values[1]*.25 + values[2]*.2 + values[3]*.2 + values[4]*.2;
   return Math.round(weighted*10)/10;
 }
+export type ClaimInput = EvidenceInput & { direction:"支持"|"反驳"|"背景"; independenceGroupId:string; methodQuality:number };
+export function aggregateClaims(prior:number,claims:ClaimInput[]){
+  const unique=[...new Map(claims.map(x=>[x.independenceGroupId,x])).values()];
+  const weighted=unique.map(x=>({...x,w:evidenceWeight(x)*x.methodQuality}));
+  const support=weighted.filter(x=>x.direction==="支持").reduce((s,x)=>s+x.w,0);
+  const oppose=weighted.filter(x=>x.direction==="反驳").reduce((s,x)=>s+x.w,0);
+  const directional=support+oppose;
+  const conflict=directional?2*Math.min(support,oppose)/directional:0;
+  const shift=directional?15*(support-oppose)/(1+directional):0;
+  const estimate=clamp(prior+shift);
+  const coverage=Math.min(1,directional/2);
+  const halfWidth=Math.max(6,25*(1-coverage)+15*conflict);
+  return {estimate:Math.round(estimate),lower:Math.round(clamp(estimate-halfWidth)),upper:Math.round(clamp(estimate+halfWidth)),coverage:Math.round(coverage*100)/100,conflict:Math.round(conflict*100)/100,priorContribution:Math.round((1-coverage)*100)/100,effectiveEvidenceCount:unique.length};
+}
+export function smoothEEB(input:BarrierInput,lambda=.45,tau=12){
+  const values=[clamp(input.rbi),clamp(input.sbi),clamp(input.cbi)];
+  const weighted=.38*values[0]+.34*values[1]+.28*values[2];
+  const max=Math.max(...values); const smooth=max+tau*Math.log(values.reduce((s,v)=>s+Math.exp((v-max)/tau),0))-tau*Math.log(3);
+  return Math.round(((1-lambda)*weighted+lambda*smooth)*10)/10;
+}

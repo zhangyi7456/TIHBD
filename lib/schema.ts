@@ -14,7 +14,9 @@ export const evidenceSchema = z.object({
   id: z.string(), industryId: z.string(), title: z.string(), source: z.string(), url: z.string().url(),
   publishedAt: z.string(), grade: z.enum(["A","B","C","D"]), scope: z.string(), stage: z.string(),
   supports: z.enum(["支持","反驳","背景"]), variable: z.enum(["RBI","SBI","CBI","BPI"]),
-  directness: z.number().min(0).max(1), generalizable: z.boolean(), summary: z.string()
+  directness: z.number().min(0).max(1), generalizable: z.boolean(), summary: z.string(),
+  claimId: z.string(), independenceGroupId: z.string(), methodQuality: z.number().min(0).max(1), reviewed: z.boolean(),
+  scopeData: z.object({ country:z.string(), province:z.string().optional(), city:z.string().optional(), market:z.string().optional(), period:z.string(), channel:z.string().optional() })
 });
 export type Evidence = z.infer<typeof evidenceSchema>;
 
