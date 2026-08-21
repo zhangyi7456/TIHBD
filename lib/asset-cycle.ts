@@ -1,5 +1,10 @@
+import { z } from "zod";
+import realAssetCycleJson from "@/data/asset-cycle.real.json";
+
 export type AssetCategory = "现金" | "衍生品" | "商品" | "美元资产" | "股票" | "债券" | "另类资产";
 export type AssetState = "强势" | "趋势增强" | "中性" | "趋势反转" | "风险升温";
+export type AssetProvenance = "REAL" | "PROXY" | "DEMO";
+export type AssetDataStatus = "OK" | "MISSING" | "INSUFFICIENT_HISTORY";
 
 export type AssetDefinition = {
   id: string;
@@ -59,30 +64,91 @@ export const assetDefinitions: AssetDefinition[] = [
   { id:"art",name:"艺术品",category:"另类资产",row:3,metric1Label:"成交指数",metric2Label:"流拍比例",seed:104 },
 ];
 
-export const assetWeeks = Array.from({ length: 208 }, (_, index) => {
-  const absoluteWeek = 35 + index;
-  return `${2022 + Math.floor((absoluteWeek - 1) / 52)}-W${String(((absoluteWeek - 1) % 52) + 1).padStart(2,"0")}`;
+const observationSchema = z.object({
+  weekId: z.string().regex(/^\d{4}-W\d{2}$/),
+  value: z.number().finite(),
+  sourceObservationDate: z.string(),
+  marketCloseAt: z.string().datetime(),
+  providerAvailableAt: z.string().datetime(),
+  status: z.literal("OK"),
 });
+
+const realAssetSchema = z.object({
+  assetId: z.string(),
+  name: z.string(),
+  provenance: z.enum(["REAL", "PROXY"]),
+  valueType: z.enum(["PRICE_INDEX", "PROXY_PRICE"]),
+  sourceOwner: z.string(),
+  provider: z.string(),
+  sourceUrl: z.string().url(),
+  proxyTarget: z.string().optional(),
+  proxyReason: z.string().optional(),
+  knownBasisRisk: z.string().optional(),
+  observations: z.array(observationSchema).min(100),
+});
+
+const realDatasetSchema = z.object({
+  schemaVersion: z.string(),
+  algorithmVersion: z.string(),
+  generatedAt: z.string().datetime(),
+  snapshotRule: z.string(),
+  dataMode: z.literal("MIXED_REAL_PROXY"),
+  assets: z.array(realAssetSchema).length(5),
+});
+
+export const realAssetCycleData = realDatasetSchema.parse(realAssetCycleJson);
+const realAssetsById = new Map(realAssetCycleData.assets.map((asset) => [asset.assetId, asset]));
+
+export const assetWeeks = [...new Set(realAssetCycleData.assets.flatMap((asset) => asset.observations.map((item) => item.weekId)))].sort();
 
 export function createAssetSeries(seed:number) {
   return assetWeeks.map((_,index) => 100 + Math.sin((index + seed) / 9) * (5 + seed % 6) + Math.cos((index + seed * 2) / 21) * 7 + index * ((seed % 7) - 3) / 180);
 }
 
 export function assetSnapshot(definition:AssetDefinition, weekIndex:number) {
-  const series=createAssetSeries(definition.seed);
-  const current=series[weekIndex];
-  const previous=series[Math.max(0,weekIndex-1)];
-  const at=(weeks:number)=>series[Math.max(0,weekIndex-weeks)];
-  const change=((current/previous)-1)*100;
-  const momentum4=((current/at(4))-1)*100;
-  const momentum13=((current/at(13))-1)*100;
-  const momentum26=((current/at(26))-1)*100;
-  const history=series.slice(0,weekIndex+1);
-  const percentile=history.filter((value)=>value<=current).length/history.length*100;
+  const realAsset=realAssetsById.get(definition.id);
+  const observationsByWeek=new Map(realAsset?.observations.map((item)=>[item.weekId,item]));
+  const series: Array<number|null>=realAsset
+    ? assetWeeks.map((week)=>observationsByWeek.get(week)?.value??null)
+    : createAssetSeries(definition.seed);
+  const current=series[weekIndex]??null;
+  const at=(weeks:number)=>series[weekIndex-weeks]??null;
+  const rate=(weeks:number)=>current!==null&&at(weeks)!==null?((current/at(weeks)!)-1)*100:null;
+  const change=rate(1);
+  const momentum4=rate(4);
+  const momentum13=rate(13);
+  const momentum26=rate(26);
+  const pastMomentum26=series.slice(0,Math.max(0,weekIndex-26)).map((value,index)=>{
+    const earlier=series[index];
+    const later=series[index+26];
+    return earlier!==null&&later!==null?((later/earlier)-1)*100:null;
+  }).filter((value):value is number=>value!==null).slice(-260);
+  const percentile=momentum26!==null&&pastMomentum26.length>=104
+    ? pastMomentum26.filter((value)=>value<=momentum26).length/pastMomentum26.length*100
+    : null;
   let state:AssetState="中性";
-  if(momentum13>5) state="强势";
-  else if(momentum13>1.5&&momentum4>momentum13/3) state="趋势增强";
-  else if(momentum13<-5) state="风险升温";
-  else if(momentum4>1.2&&momentum13<0) state="趋势反转";
-  return {series,current,change,momentum4,momentum13,momentum26,percentile,state,metric1:momentum13,metric2:percentile};
+  if(momentum13!==null&&momentum4!==null) {
+    if(momentum13>5) state="强势";
+    else if(momentum13>1.5&&momentum4>momentum13/3) state="趋势增强";
+    else if(momentum13<-5) state="风险升温";
+    else if(momentum4>1.2&&momentum13<0) state="趋势反转";
+  }
+  const observation=realAsset?observationsByWeek.get(assetWeeks[weekIndex]):undefined;
+  const provenance:AssetProvenance=realAsset?.provenance??"DEMO";
+  const dataStatus:AssetDataStatus=current===null?"MISSING":percentile===null?"INSUFFICIENT_HISTORY":"OK";
+  return {
+    series,current,change,momentum4,momentum13,momentum26,percentile,state,
+    metric1:momentum13,metric2:percentile,
+    metric1Label:realAsset?"13周动量":definition.metric1Label,
+    metric2Label:realAsset?"26周动量分位":definition.metric2Label,
+    provenance,dataStatus,
+    sourceObservationDate:observation?.sourceObservationDate??null,
+    providerAvailableAt:observation?.providerAvailableAt??null,
+    sourceOwner:realAsset?.sourceOwner??"确定性演示生成器",
+    provider:realAsset?.provider??"本地演示序列",
+    sourceUrl:realAsset?.sourceUrl??null,
+    valueType:realAsset?.valueType??"DEMO_INDEX",
+    proxyReason:realAsset?.proxyReason??null,
+    knownBasisRisk:realAsset?.knownBasisRisk??null,
+  };
 }
